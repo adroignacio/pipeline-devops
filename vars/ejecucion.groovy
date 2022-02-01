@@ -46,7 +46,7 @@ pipeline {
                     slackSend color: 'good', message: "Alejandro [${JOB_NAME}] [${BUILD_TAG}] Ejecucion Exitosa", teamDomain: 'dipdevopsusac-tr94431', tokenCredentialId: 'slack-credential'
                 }
                 failure{
-                    slackSend color: 'danger', message: "Alejandro [${env.JOB_NAME}] [${BUILD_TAG}] Ejecucion fallida", teamDomain: 'dipdevopsusac-tr94431', tokenCredentialId: 'slack-credential'
+                    slackSend color: 'danger', message: "Alejandro [${env.JOB_NAME}] [${BUILD_TAG}] Ejecucion fallida en stage [${env.TAREA}]", teamDomain: 'dipdevopsusac-tr94431', tokenCredentialId: 'slack-credential'
                 }
             }
         }
