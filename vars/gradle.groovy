@@ -25,7 +25,7 @@ def call(stages){
             stages.each{ stageToExecute ->//variable as param
                 if(stageName.equals(stageToExecute)){
                 echo 'Ejecutando ' + stageFunction
-                "${stageFunction}"(()
+                "${stageFunction}"()
                 }
             }
         }  
