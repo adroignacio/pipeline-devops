@@ -1,10 +1,12 @@
+import utilities.*
+
 def call(stages){
 
-    def stagesList = stage.split(";")
-    stagesList.each{
-        println("===>${it}")
-        "${it}"()
-    }
+//    def stagesList = stage.split(";")
+//    stagesList.each{
+//        println("===>${it}")
+//        "${it}"()
+//    }
 
     def listStagesOrder = [
         'build': 'stageCleanBuildTest',
@@ -15,6 +17,10 @@ def call(stages){
         'run_jar': 'stageRunJar',
         'curl_jar': 'stageCurlJar'
     ]
+
+    def arrayUtils = new array.arrayExtentions();
+    def stagesArray = []
+        stagesArray = arrayUtils.searchKeyInArray(stages, ";", listStagesOrder)
 
     if (stages.isEmpty()) {
         echo 'El pipeline se ejecutará completo'
