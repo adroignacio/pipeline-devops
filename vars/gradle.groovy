@@ -1,24 +1,45 @@
-/*
-	forma de invocación de método call:
-	def ejecucion = load 'script.groovy'
-	ejecucion.call()
-*/
 def call(stages){
 
-    def stageList = stages.split(";")
-
-    stageList.each{
-        println("Stages enviador ====> ${it}")
+    def stagesList = stage.split(";")
+    stagesList.each{
+        println("===>${it}")
+        "${it}"()
     }
 
+    def listStagesOrder = [
+        'build': 'stageCleanBuildTest',
+        'sonar': 'stageSonar',
+        'curl_spring': 'stageRunSpringCurl',
+        'upload_nexus': 'stageUploadNexus',
+        'download_nexus': 'stageDownloadNexus',
+        'run_jar': 'stageRunJar',
+        'curl_jar': 'stageCurlJar'
+    ]
 
+    if (stages.isEmpty()) {
+        echo 'El pipeline se ejecutará completo'
+        allStages()
+    } else {
+        echo 'Stages a ejecutar :' + stages
+        listStagesOrder.each { stageName, stageFunction ->
+            stages.each{ stageToExecute ->//variable as param
+                if(stageName.equals(stageToExecute)){
+                echo 'Ejecutando ' + stageFunction
+                "${stageFunction}"(()
+                }
+            }
+        }  
+}
 
+def stageCleanBuildTest(){
     env.TAREA = "Paso 1: Build && Test"
     stage("$env.TAREA"){
         sh "echo 'Build && Test!'"
         sh "gradle clean build"
     }
+}
 
+def stageSonar(){
     env.TAREA="Paso 2: Sonar - Análisis Estático"
     stage("$env.TAREA"){
         sh "echo 'Análisis Estático!'"
@@ -26,13 +47,17 @@ def call(stages){
             sh './gradlew sonarqube -Dsonar.projectKey=ejemplo-gradle -Dsonar.java.binaries=build'
         }
     }
+}
 
+def stageRunSpringCurl(){
     env.TAREA="Paso 3: Curl Springboot Gradle sleep 20"
     stage("$env.TAREA"){
         sh "gradle bootRun&"
         sh "sleep 20 && curl -X GET 'http://localhost:8081/rest/mscovid/test?msg=testing'"
     }
-    
+}
+
+def stageUploadNexus(){
     env.TAREA="Paso 4: Subir Nexus"
     stage("$env.TAREA"){
         nexusPublisher nexusInstanceId: 'nexus',
@@ -54,21 +79,37 @@ def call(stages){
             ]
         ]
     }
+}
 
+def stageDownloadNexus(){
     env.TAREA="Paso 5: Descargar Nexus"
     stage("$env.TAREA"){
         sh ' curl -X GET -u $NEXUS_USER:$NEXUS_PASSWORD "http://nexus:8081/repository/devops-usach-nexus/com/devopsusach2020/DevOpsUsach2020/0.0.1/DevOpsUsach2020-0.0.1.jar" -O'
     }
+}
 
+def stageRunJar(){
     env.TAREA="Paso 6: Levantar Artefacto Jar"
     stage("$env.TAREA"){
         sh 'nohup bash java -jar DevOpsUsach2020-0.0.1.jar & >/dev/null'
     }
+}
 
+def stageCurlJar(){
     env.TAREA="Paso 7: Testear Artefacto - Dormir(Esperar 20sg)"
     stage("$env.TAREA"){
         sh "sleep 20 && curl -X GET 'http://localhost:8081/rest/mscovid/test?msg=testing'"
     }
+}
+
+def allStages(){
+    stageCleanBuildTest()
+    stageSonar()
+    stageRunSpringCurl()
+    stageUploadNexus()
+    stageDownloadNexus()
+    stageRunJar()
+    stageCurlJar()
 }
 
 return this;
