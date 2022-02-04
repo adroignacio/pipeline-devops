@@ -8,34 +8,30 @@ def call(stages){
 //        "${it}"()
 //    }
 
-    def listStagesOrder = [
-        'build': 'stageCleanBuildTest',
-        'sonar': 'stageSonar',
-        'curl_spring': 'stageRunSpringCurl',
-        'upload_nexus': 'stageUploadNexus',
-        'download_nexus': 'stageDownloadNexus',
-        'run_jar': 'stageRunJar',
-        'curl_jar': 'stageCurlJar'
-    ]
-
     def arrayUtils = new array.arrayExtentions();
     def stagesArray = []
         stagesArray = arrayUtils.searchKeyInArray(stages, ";", listStagesOrder)
 
-    if (stages.isEmpty()) {
+    if (stagesArray.isEmpty()) {
         echo 'El pipeline se ejecutará completo'
         allStages()
     } else {
         echo 'Stages a ejecutar :' + stages
-        listStagesOrder.each { stageName, stageFunction ->
-            stages.each{ stageToExecute ->//variable as param
-                if(stageName.equals(stageToExecute)){
-                echo 'Ejecutando ' + stageFunction
-                "${stageFunction}"()
-                }
-            }
-        }  
+        stagesArray.each{ stageFunction ->//variable as param
+            echo 'Ejecutando ' + stageFunction
+            "${stageFunction}"()
+        }
     }
+}
+
+def allStages(){
+    stageCleanBuildTest()
+    stageSonar()
+    stageRunSpringCurl()
+    stageUploadNexus()
+    stageDownloadNexus()
+    stageRunJar()
+    stageCurlJar()
 }
 
 def stageCleanBuildTest(){
@@ -107,16 +103,6 @@ def stageCurlJar(){
     stage("$env.TAREA"){
         sh "sleep 20 && curl -X GET 'http://localhost:8081/rest/mscovid/test?msg=testing'"
     }
-}
-
-def allStages(){
-    stageCleanBuildTest()
-    stageSonar()
-    stageRunSpringCurl()
-    stageUploadNexus()
-    stageDownloadNexus()
-    stageRunJar()
-    stageCurlJar()
 }
 
 return this;
