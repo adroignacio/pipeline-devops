@@ -8,6 +8,16 @@ def call(stages){
 //        "${it}"()
 //    }
 
+    def listStagesOrder = [
+        'build': 'stageCleanBuildTest',
+        'sonar': 'stageSonar',
+        'curl_spring': 'stageRunSpringCurl',
+        'upload_nexus': 'stageUploadNexus',
+        'download_nexus': 'stageDownloadNexus',
+        'run_jar': 'stageRunJar',
+        'curl_jar': 'stageCurlJar'
+    ]
+
     def arrayUtils = new array.arrayExtentions();
     def stagesArray = []
         stagesArray = arrayUtils.searchKeyInArray(stages, ";", listStagesOrder)
