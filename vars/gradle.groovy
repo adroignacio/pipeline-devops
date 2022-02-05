@@ -2,11 +2,6 @@ import utilities.*
 
 def call(stages){
 
-//    def stagesList = stage.split(";")
-//    stagesList.each{
-//        println("===>${it}")
-//        "${it}"()
-//    }
 
     def listStagesOrder = [
         'build': 'stageCleanBuildTest',
